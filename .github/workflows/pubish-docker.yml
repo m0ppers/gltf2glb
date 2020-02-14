@@ -8,13 +8,12 @@ jobs:
     # This job runs on Linux
     runs-on: ubuntu-latest
     steps:
-      - name: Configure environment
+      - uses: actions/checkout@v2
+      - name: branch slug
         id: config
         run: |
-          VERSION=$(echo $GITHUB_REF | sed -e "s/^refs\/tags\/v//")
-          echo "GEIL ${VERSION}"
+          VERSION=$(git branch --show-current | sed -e "s/[^a-zA-Z-]/-/g")
           echo ::set-output name=version::$VERSION
-      - uses: actions/checkout@v2
       - name: Docker Action
         uses: zenato/docker-action@v1.0.0
         with:
