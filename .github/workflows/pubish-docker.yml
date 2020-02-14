@@ -20,4 +20,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: m0ppers/gltf2glb
-          tag: ${{ VERSION }}
+          tag: ${{ steps.config.outputs.version }}
