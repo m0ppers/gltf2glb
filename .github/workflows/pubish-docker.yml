@@ -1,0 +1,23 @@
+name: Build
+# This workflow is triggered on pushes to the repository.
+on: [push]
+
+jobs:
+  build:
+    name: publish docker
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: branch slug
+        id: config
+        run: |
+          VERSION=$(git branch --show-current | sed -e "s/[^a-zA-Z-]/-/g")
+          echo ::set-output name=version::$VERSION
+      - name: Docker Action
+        uses: zenato/docker-action@v1.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: m0ppers/gltf2glb
+          tag: ${{ steps.config.outputs.version }}
