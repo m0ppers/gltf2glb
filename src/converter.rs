@@ -64,6 +64,7 @@ fn prepare_chunks(
         _ => return Ok((json, None)),
     };
 
+    // glb only supports a single buffer
     let buffer = buffers
         .into_iter()
         .try_fold(vec![], |mut v: Vec<u8>, buffer| {
@@ -92,6 +93,7 @@ fn prepare_chunks(
             v.extend(data.iter());
             Ok(v)
         })?;
+
     Ok((json, Some(buffer)))
 }
 
@@ -139,16 +141,15 @@ where
 
     let total_size = match buffer {
         Some(buffer) => {
-            let padding = (4 - buffer.len() % 4) % 4;
-            let binary_chunk = GlbChunk::binary(buffer.len() as u32);
+            let mut binary_len = buffer.len();
+            let padding = (4 - binary_len % 4) % 4;
+            binary_len += padding;
+            let binary_chunk = GlbChunk::binary(binary_len as u32);
             unsafe {
                 writer.write(any_as_u8_slice(&binary_chunk))?;
             }
             padded(&mut writer, &[0], |writer| writer.write(&buffer))?;
-            json_size
-                + json_offset
-                + std::mem::size_of::<GlbChunk>() as u64
-                + (buffer.len() + padding) as u64
+            json_size + json_offset + std::mem::size_of::<GlbChunk>() as u64 + binary_len as u64
         }
         None => json_size + json_offset,
     };
